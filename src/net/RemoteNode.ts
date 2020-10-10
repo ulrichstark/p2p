@@ -1,6 +1,6 @@
 import * as net from "net";
 import { ActionType } from "../protocol/ActionType";
-import { IAction } from "../protocol/IAction";
+import { Action } from "../protocol/Action";
 import { Logger } from "../utils/Logger";
 import { INodeListener } from "./INodeListener";
 
@@ -33,11 +33,13 @@ export class RemoteNode {
     }
 
     public sendPing() {
-        this.pingSentTime = Date.now();
-        this.send({ type: ActionType.PING });
+        if (this.pingSentTime === null) {
+            this.pingSentTime = Date.now();
+            this.send({ type: ActionType.PING });
+        }
     }
 
-    public send(action: IAction) {
+    public send(action: Action) {
         const data = JSON.stringify(action);
         const packet = data.length.toString() + seperator + data;
         this.socket.write(packet, encoding);
@@ -66,13 +68,13 @@ export class RemoteNode {
                     index = packetDataIndex + packetLength;
                 }
             } catch (error) {
-                this.logger.log(`ERROR ${error}`);
+                this.logger.log(`cant handle action: ${error}`);
             }
         }
     }
 
     private handlePacket(packet: string) {
-        const action = JSON.parse(packet) as IAction;
+        const action = JSON.parse(packet) as Action;
 
         if (action && typeof action.type === "string") {
             this.handleAction(action);
@@ -81,7 +83,7 @@ export class RemoteNode {
         }
     }
 
-    private handleAction(action: IAction) {
+    private handleAction(action: Action) {
         switch (action.type) {
             case ActionType.PING: {
                 this.send({ type: ActionType.PONG });
