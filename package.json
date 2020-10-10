@@ -1,0 +1,18 @@
+{
+    "name": "p2p",
+    "version": "1.0",
+    "license": "UNLICENSED",
+    "private": "true",
+    "scripts": {
+        "watch": "webpack-cli --config webpack.config.js",
+        "start": "node build/index.js"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@types/node": "^14.11.8",
+        "ts-loader": "^8.0.4",
+        "typescript": "^4.0.3",
+        "webpack": "^4.44.2",
+        "webpack-cli": "^3.3.12"
+    }
+}
