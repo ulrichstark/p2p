@@ -1,12 +1,23 @@
-import { LOADIPHLPAPI } from "dns";
 import * as net from "net";
 import { Logger } from "../utils/Logger";
+import { INodeListener } from "./INodeListener";
 import { RemoteNode } from "./RemoteNode";
 
 export class LocalNode {
     private logger: Logger = new Logger("LocalNode");
     private server: net.Server;
-    private connectedNodes: RemoteNode[] = [];
+    private connections: RemoteNode[] = [];
+
+    private nodeListener: INodeListener = {
+        onNodeAction: (remoteNode, action) => {},
+        onNodeDisconnect: (remoteNode) => {
+            const index = this.connections.indexOf(remoteNode);
+
+            if (index >= 0) {
+                this.connections.splice(index, 1);
+            }
+        },
+    };
 
     constructor(port: number) {
         this.server = net.createServer((socket) => this.handleConnection(socket));
@@ -15,7 +26,8 @@ export class LocalNode {
     }
 
     private handleConnection(socket: net.Socket) {
-        const remoteNode = new RemoteNode(socket);
+        const remoteNode = new RemoteNode(socket, this.nodeListener);
+        this.connections.push(remoteNode);
     }
 
     public connect(port: number) {
